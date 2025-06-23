@@ -2,17 +2,12 @@ package server
 
 import (
 	"goenvs/handler"
-	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-func Server() *http.Server {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", handler.HeavyHandler)
-
-	server := &http.Server{
-		Addr:    ":8080",
-		Handler: mux,
-	}
-
-	return server
+func Router() *mux.Router {
+	router := mux.NewRouter()
+	router.HandleFunc("/", handler.HeavyHandler)
+	return router
 }

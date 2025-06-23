@@ -1,52 +1,29 @@
-# FROM golang:latest
-
-# WORKDIR /app
-
-# # Copy go mod files
-# COPY go.mod ./
-# RUN go mod download
-
-# # Copy the source code
-# COPY main.go ./
-# COPY handler ./handler
-# COPY server ./server
-
-# # Expose the port your app listens on
-# EXPOSE 8080
-
-# # Run the binary
-# CMD ["go","run","main.go"]
-
-# syntax=docker/dockerfile:1
-
-########################################################
-# 1) Build Stage: Compile a statically-linked Go binary
-########################################################
+# Here Google's distroless image is used to generate the static golang binary.
 FROM golang:latest AS builder
+
 WORKDIR /app
 
-# Enable CGO=0 for a fully static binary (Distroless has no C libs) :contentReference[oaicite:0]{index=0}
-ENV CGO_ENABLED=0 \
-    GOOS=linux \
-    GOARCH=amd64
+COPY go.mod go.sum ./
 
-# Copy dependency files and download modules
-COPY go.mod ./
 RUN go mod download
 
-# Copy all source and build
 COPY main.go ./
+
 COPY handler ./handler
+
 COPY server ./server
-RUN go build -o main ./main.go
 
-########################################################
-# 2) Runtime Stage: Distroless static image
-########################################################
-FROM gcr.io/distroless/static
+# Building the Go binary (static binary)
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app main.go
 
-# Working directory (optional)
-COPY --from=builder /app/main /main
+FROM gcr.io/distroless/static:nonroot
+
+WORKDIR /
+
+COPY --from=builder /app/app /
 
 USER nonroot:nonroot
-ENTRYPOINT ["/main"]
+
+EXPOSE 8080
+
+ENTRYPOINT ["/app"]

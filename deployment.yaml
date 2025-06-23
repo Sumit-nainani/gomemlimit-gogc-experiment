@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: go-app
-          image: nainani344sumit/gomemlimit-exp:v2
+          image: nainani344sumit/distroless-gomemlimit:v3
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

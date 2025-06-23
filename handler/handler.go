@@ -8,6 +8,7 @@ import (
 	"sync"
 )
 
+// Different colors for different memory usage
 const (
 	colorReset  = "\033[0m"
 	colorRed    = "\033[31m"
